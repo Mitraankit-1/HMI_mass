@@ -29,6 +29,7 @@ class Handler:
         self.connecting = False
         self.connecting_start_time = 0.0
         self.estop_release_time = 0.0
+        self.last_obstacle_time = 0.0
         self.last_trip_state = self._load_trip_state()
         self.startup_restore_pending = self.last_trip_state is not None
 
@@ -401,8 +402,9 @@ class Handler:
         ):
             logger.info(f"Successfully set next station to {next_station}")
         if stoppage_type == "detected_obstacle":
+            self.last_obstacle_time = time.time()
             self.switch_to_warning()
-            
+
             if self.client.write_coil(512, 1):
                 logger.info("Shown obstacle detected image")
             else:
@@ -455,10 +457,11 @@ class Handler:
                 ):
                     logger.info("Successfully set basic obstacle detected warning")
         else:
-            # Set coils 500-511 to 0
+            if time.time() - self.last_obstacle_time < 5:
+                logger.info(f"Obstacle recently shown ({stoppage_type}), holding obstacle screen")
+                return
             for coil_address in range(500, 513):
                 self.client.write_coil(coil_address, 0)
-    
             self.switch_to_home()
 
     def handle_action_terminate_trip(self, msg):
