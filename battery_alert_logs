@@ -1,0 +1,9 @@
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 25, 'mode': 'fleet'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 25, 'mode': 'fleet'}
+{'type': 'mule_error', 'code': 'generic_error', 'module': 'serial_can_driver', 'sub_module': 'generic_error', 'message': 'generic_error', 'display_message': 'generic_error', 'recovery_message': 'Contact Ati Support', 'relevant_logs': ['mule.log', 'mule_comms.log', 'allconfig.txt'], 'incident_id': 'generic_error-xt-dev-validation-hall1-blr-2025-03-05-16-16-11', 'run_folder': None, 'data_uploaded': False, 'other_info': {'yelli_pose': [-1.755, 4.24, 2.832]}, 'error_code': '1-103-306-071'}
+{'type': 'alerts', 'to_fm': True, 'timestamp': 1718877957.2383213, 'emergency_button': 'Emergency Button was pressed'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 25, 'mode': 'manual'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 25, 'mode': 'manual'}
+{'type': 'alerts', 'to_fm': True, 'timestamp': 1718877957.2383213, 'emergency_button': ''}
+{'type': 'mule_error', 'code': 'generic_error', 'module': 'serial_can_driver', 'sub_module': 'generic_error', 'message': 'generic_error', 'display_message': 'generic_error', 'recovery_message': 'Contact Ati Support', 'relevant_logs': ['mule.log', 'mule_comms.log', 'allconfig.txt'], 'incident_id': 'generic_error-xt-dev-validation-hall1-blr-2025-03-05-16-16-11', 'run_folder': None, 'data_uploaded': False, 'other_info': {'yelli_pose': [-1.755, 4.24, 2.832]}, 'error_code': '1-103-306-071'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 25, 'mode': 'fleet'}

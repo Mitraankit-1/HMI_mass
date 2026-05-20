@@ -1,0 +1,1 @@
+{'basic_trip_description': {'booked_by': 'admin', 'description': '', 'route': ['sta1', 'sta2', 'sta1'], 'curr_station': 'sta2', 'next_station': 'sta1', 'waiting_for': 'Waiting for dispatch', 'status': 'waiting_station', 'trip_id': 354, 'trip_leg_id': 932}, 'type': 'peripheral_trip_description'}

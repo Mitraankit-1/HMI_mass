@@ -1,0 +1,4 @@
+pyModbusTCP
+aiofiles
+aioredis
+asyncio

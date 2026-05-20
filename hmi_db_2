@@ -1,0 +1,17 @@
+{'type': 'trip_description', 'booked_by': 'admin', 'description': '', 'route': ['Station 0', 'Station 1', 'Station 0'], 'curr_station': 'Station 1', 'next_station': 'Station 1', 'waiting_for': ' ', 'status': 'en_route', 'trip_id': 9973, 'trip_leg_id': 35638}
+{'signal_strength': -45, 'SSID': '"Ati-Gauss"  ', 'network_type': 'wlan0', 'type': 'network_stats', 'connected_to_FM': True}
+{'type': 'trip_description', 'booked_by': 'admin', 'description': '', 'route': ['Station 0', 'Station 1', 'Station 0'], 'curr_station': 'Station 2', 'next_station': 'Station 2', 'waiting_for': ' ', 'status': 'en_route', 'trip_id': 9973, 'trip_leg_id': 35638}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 51, 'mode': 'fleet'}
+{'ttl': None, 'ack_reqd': True, 'trip_id': 4462, 'trip_leg_id': 31035, 'timestamp': 1748505491.6212902, 'req_id': 'LWNJWES5GI', 'action': 'terminate_trip'}
+{'ttl': None, 'ack_reqd': True, 'trip_id': 4462, 'trip_leg_id': 31035, 'timestamp': 1748505491.6212902, 'req_id': 'LWNJWES5GI', 'action': 'terminate_trip'}
+{'ttl': None, 'ack_reqd': True, 'trip_id': 4462, 'trip_leg_id': 31035, 'timestamp': 1748505491.6212902, 'req_id': 'LWNJWES5GI', 'action': 'terminate_trip'}
+{'type': 'trip_description', 'booked_by': 'admin', 'description': '', 'route': ['Station 0', 'Station 1', 'Station 0'], 'curr_station': 'Station 3', 'next_station': 'Station 3', 'waiting_for': ' ', 'status': 'en_route', 'trip_id': 9973, 'trip_leg_id': 35638}
+{'type': 'keshav', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 51, 'mode': 'fleet'}
+{'type': 'trip_description', 'booked_by': 'admin', 'description': '', 'route': ['Station 0', 'Station 1', 'Station 0'], 'curr_station': 'Station 4', 'next_station': 'Station 4', 'waiting_for': ' ', 'status': 'en_route', 'trip_id': 9973, 'trip_leg_id': 35638}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 51, 'mode': 'fleet'}
+{'type': 'trip_description', 'booked_by': 'admin', 'description': '', 'route': ['Station 0', 'Station 1', 'Station 0'], 'curr_station': 'Station 5', 'next_station': 'Station 5', 'waiting_for': ' ', 'status': 'en_route', 'trip_id': 9973, 'trip_leg_id': 35638}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 51, 'mode': 'fleet'}
+{'type': 'trip_description', 'booked_by': 'admin', 'description': '', 'route': ['Station 0', 'Station 1', 'Station 0'], 'curr_station': 'Station 6', 'next_station': 'Station 6', 'waiting_for': ' ', 'status': 'en_route', 'trip_id': 9973, 'trip_leg_id': 35638}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 51, 'mode': 'fleet'}
+{'ttl': None, 'ack_reqd': True, 'trip_id': 4462, 'trip_leg_id': 31035, 'timestamp': 1748505491.6212902, 'req_id': 'LWNJWES5GI', 'action': 'terminate_trip'}
+{'ttl': None, 'ack_reqd': True, 'trip_id': 4462, 'trip_leg_id': 31035, 'timestamp': 1748505491.6212902, 'req_id': 'LWNJWES5GI', 'action': 'move_to'}

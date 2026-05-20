@@ -1,0 +1,21 @@
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'fleet'}
+{'type': 'mule_error', 'code': 'generic_error', 'module': 'serial_can_driver', 'sub_module': 'generic_error', 'message': 'generic_error', 'display_message': 'generic_error', 'recovery_message': 'Contact Ati Support', 'relevant_logs': ['mule.log', 'mule_comms.log', 'allconfig.txt'], 'incident_id': 'generic_error-xt-dev-validation-hall1-blr-2025-03-05-16-16-11', 'run_folder': None, 'data_uploaded': False, 'other_info': {'yelli_pose': [-1.755, 4.24, 2.832]}, 'error_code': '1-103-306-071'}
+{'type': 'mule_error', 'code': 'device_monitor', 'module': 'device_monitor', 'sub_module': 'devices', 'message': 'Device disconnected', 'display_message': 'Device disconnected. Stopping Sherpa while device reconnects', 'recovery_message': 'Please powercycle the sherpa', 'relevant_logs': ['mule.log'], 'incident_id': 'device_monitor-xt-dev-validation-hall1-blr-2025-02-12-16-35-33', 'run_folder': '/data/Wed/2025-02-12-16-34-21-xt-dev-validation-blr-hall1-manual', 'data_uploaded': False, 'other_info': {'device': 'wheel_enc', 'timeout': 60, 'yelli_pose': [-12.958, 16.691, -1.555]}, 'error_code': '1-103-104-031'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'manual'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'fleet'}
+{'type': 'mule_error', 'code': 'device_monitor', 'module': 'device_monitor', 'sub_module': 'devices', 'message': 'Device disconnected', 'display_message': 'Device disconnected. Stopping Sherpa while device reconnects', 'recovery_message': 'Please powercycle the sherpa', 'relevant_logs': ['mule.log'], 'incident_id': 'device_monitor-xt-dev-validation-hall1-blr-2025-02-12-16-35-33', 'run_folder': '/data/Wed/2025-02-12-16-34-21-xt-dev-validation-blr-hall1-manual', 'data_uploaded': False, 'other_info': {'device': 'wheel_enc', 'timeout': 60, 'yelli_pose': [-12.958, 16.691, -1.555]}, 'error_code': '1-103-104-031'}
+{'type': 'alerts', 'to_fm': True, 'timestamp': 1733132470.404935, 'emergency_button': 'Emergency Button was pressed'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'manual'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'fleet'}
+{'type': 'mule_error', 'code': 'device_monitor', 'module': 'device_monitor', 'sub_module': 'devices', 'message': 'Device disconnected', 'display_message': 'Device disconnected. Stopping Sherpa while device reconnects', 'recovery_message': 'Please powercycle the sherpa', 'relevant_logs': ['mule.log'], 'incident_id': 'device_monitor-xt-dev-validation-hall1-blr-2025-02-12-16-35-33', 'run_folder': '/data/Wed/2025-02-12-16-34-21-xt-dev-validation-blr-hall1-manual', 'data_uploaded': False, 'other_info': {'device': 'wheel_enc', 'timeout': 60, 'yelli_pose': [-12.958, 16.691, -1.555]}, 'error_code': '1-103-104-031'}
+{'type': 'alerts', 'to_fm': True, 'timestamp': 1733132470.404935, 'emergency_button': 'Emergency Button was pressed'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'manual'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'fleet'}
+{'type': 'alerts', 'to_fm': True, 'timestamp': 1733132470.404935, 'emergency_button': 'Emergency Button was pressed'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'manual'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'fleet'}
+{'type': 'alerts', 'to_fm': True, 'timestamp': 1733132470.404935, 'emergency_button': 'Emergency Button was pressed'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'manual'}
+{'type': 'sherpa_status', 'timestamp': 1706521390.0916793, 'sherpa_name': 'tug-sherpa11', 'battery_status': 20, 'mode': 'fleet'}
+{'type': 'alerts', 'to_fm': True, 'timestamp': 1733132470.404935, 'emergency_button': 'Emergency Button was pressed'}
+
