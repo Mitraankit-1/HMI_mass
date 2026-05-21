@@ -30,6 +30,8 @@ class Handler:
         self.connecting_start_time = 0.0
         self.estop_release_time = 0.0
         self.last_obstacle_time = 0.0
+        self.pre_emergency_state = None  # screen context saved when emergency is pressed
+        self._hmi_screen_initialized = False  # True once a screen write reaches the panel
         self.last_trip_state = self._load_trip_state()
         self.startup_restore_pending = self.last_trip_state is not None
 
@@ -65,23 +67,26 @@ class Handler:
     def _restore_trip_state(self):
         if not self.last_trip_state:
             self.client.write_register(9, 0)
-            return
+            return False
         try:
             screen = self.last_trip_state.get('screen')
             if screen == 'warning':
                 waiting_for = self.last_trip_state.get('waiting_for', '')
                 next_station = self.last_trip_state.get('next_station', '')
-                self.switch_to_warning()
+                ok = self.switch_to_warning()
                 if next_station:
                     self.client.write_string_to_registers(hmm.WriteAddresses.NEXT_STATION, next_station, 30)
                 if waiting_for:
                     self.client.write_string_to_registers(hmm.WriteAddresses.WARNING_INFO, waiting_for, 50)
                 logger.info(f"Restored trip state on startup: waiting_for='{waiting_for}', next_station='{next_station}'")
+                return ok
             else:
                 self.client.write_register(9, 0)
+                return False
         except Exception as e:
             logger.warning(f"Failed to restore trip state: {e}")
             self.client.write_register(9, 0)
+            return False
 
     def _show_connecting(self):
         self.connecting = True
@@ -278,6 +283,7 @@ class Handler:
                         self._clear_trip_state()
                     logger.info(f"Error cleared: mode changed from {self.previous_mode} to {mode}")
             self.previous_mode = mode
+            self._hmi_screen_initialized = False  # force re-push on next sherpa_status
             if not self.error_active:
                 if mode == 'fleet':
                     if self.startup_restore_pending or self.last_trip_state:
@@ -287,10 +293,36 @@ class Handler:
                         self._show_connecting()
                 else:
                     self.client.write_register(9, 0)
+
+        # Retry fleet screen push on every sherpa_status until Modbus writes succeed.
+        # The mode-change block above fires only once; if the panel wasn't ready at that
+        # moment the screen stays on the default boot page until this retry succeeds.
+        if mode == 'fleet' and not self._hmi_screen_initialized and not self.error_active and not self.alert:
+            if self.last_trip_state:
+                ok = self._restore_trip_state()
+            elif self.connecting:
+                ok = self.switch_to_warning()
+                if ok:
+                    self.client.write_string_to_registers(
+                        hmm.WriteAddresses.WARNING_INFO, "Connecting to Fleet Manager...", 50
+                    )
+            else:
+                ok = self.switch_to_home()
+            if ok:
+                self._hmi_screen_initialized = True
+                logger.info("HMI screen successfully initialized")
     
     def handle_set_alerts(self, msg):
         emergency_button = str(msg.get('emergency_button', ''))
         if emergency_button == "Emergency Button was pressed":
+            # Snapshot the current screen so we can restore it on disengage
+            if self.error_active:
+                self.pre_emergency_state = 'error'
+            elif self.last_trip_state:
+                self.pre_emergency_state = 'dispatch'
+            else:
+                self.pre_emergency_state = 'home'
+            logger.info(f"Emergency pressed — saved pre-emergency state: {self.pre_emergency_state}")
             self.alert = True
             self.switch_to_alert()
             if self.client.write_string_to_registers(hmm.WriteAddresses.ERROR_INFO, emergency_button, 50):
@@ -298,15 +330,19 @@ class Handler:
             else:
                 logger.error(f"Failed to write error info : {emergency_button} to register")
         else:
-            logger.info(f"Emergency button disengaged (error_active={self.error_active})")
+            logger.info(f"Emergency button disengaged — restoring pre-emergency state: {self.pre_emergency_state}")
             self.alert = False
             self.estop_release_time = time.time()
-            if self.error_active:
+            if self.pre_emergency_state == 'error' or self.error_active:
                 self.switch_to_error()
-                logger.info("Returning to error screen after emergency button release")
+                logger.info("Restored error screen after emergency button release")
+            elif self.pre_emergency_state == 'dispatch' and self.last_trip_state:
+                self._restore_trip_state()
+                logger.info("Restored dispatch state after emergency button release")
             else:
                 self.switch_to_home()
-                logger.info("Returned to home screen after emergency button release")
+                logger.info("Restored home screen after emergency button release")
+            self.pre_emergency_state = None
             
     def handle_set_mule_error(self, msg):
         if not self.alert:
@@ -376,8 +412,15 @@ class Handler:
             ):
                 logger.info(f"Successfully set warning : {waiting_for}")
         else:
-            self._clear_trip_state()
-            self.switch_to_home()
+            # Only leave the dispatch screen if the trip actually started (en_route)
+            # or there was never a saved dispatch state. An empty waiting_for with a
+            # non-en_route status can be a reconnect-sync message from the FM — don't
+            # let it erase a valid "Waiting for Dispatch" state restored on startup.
+            if status == "en_route" or not self.last_trip_state:
+                self._clear_trip_state()
+                self.switch_to_home()
+            else:
+                logger.info(f"Received empty waiting_for with status='{status}' — preserving dispatch state")
 
     def handle_set_trip_status(self, msg):
         if self.error_active:
@@ -460,6 +503,9 @@ class Handler:
             if time.time() - self.last_obstacle_time < 5:
                 logger.info(f"Obstacle recently shown ({stoppage_type}), holding obstacle screen")
                 return
+            if self.last_trip_state:
+                logger.info(f"Skipping switch_to_home in trip_status — preserving dispatch state (stoppage_type={stoppage_type})")
+                return
             for coil_address in range(500, 513):
                 self.client.write_coil(coil_address, 0)
             self.switch_to_home()
@@ -469,6 +515,7 @@ class Handler:
         Handle terminate_trip action messages
         """
         trip_id = msg.get('trip_id')
+        self._clear_trip_state()
         self.client.write_coil(17, 0)
         self.client.write_register(0, 0)
         logger.info(f"Received terminate_trip action - Trip ID: {trip_id}")
@@ -482,6 +529,7 @@ class Handler:
         ])
         if not ok:
             logger.error("switch_to_warning: one or more register writes failed")
+        return ok
 
     def switch_to_home(self):
         ok = all([
@@ -494,6 +542,7 @@ class Handler:
             logger.error("switch_to_home: one or more register writes failed")
         for coil_address in range(500, 513):
             self.client.write_coil(coil_address, 0)
+        return ok
 
     def switch_to_error(self):
         ok = all([
@@ -506,6 +555,7 @@ class Handler:
             logger.error("switch_to_error: one or more register writes failed")
         for coil_address in range(500, 513):
             self.client.write_coil(coil_address, 0)
+        return ok
 
     def switch_to_alert(self):
         ok = all([
@@ -518,6 +568,7 @@ class Handler:
             logger.error("switch_to_alert: one or more register writes failed")
         for coil_address in range(500, 513):
             self.client.write_coil(coil_address, 0)
+        return ok
 
     def update_bot_position(self, x: float, y: float, heading: float):
         """Update bot's current position"""
