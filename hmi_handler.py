@@ -422,6 +422,32 @@ class Handler:
             else:
                 logger.info(f"Received empty waiting_for with status='{status}' — preserving dispatch state")
 
+    def handle_set_peripheral_trip_description(self, msg):
+        trip = msg.get("basic_trip_description", {})
+        status = str(trip.get("status", ""))
+        next_station = trip.get("next_station", "")
+        waiting_for = str(trip.get("waiting_for", "")).strip()
+
+        # Always save the dispatch state so it survives error/alert screens
+        # and can be restored once emergency is released
+        if waiting_for and status != "en_route":
+            self._save_trip_state({'screen': 'warning', 'waiting_for': waiting_for, 'next_station': next_station})
+            # If emergency is currently active, update the restore target to dispatch
+            # so releasing the e-stop returns to "Waiting for dispatch" not the error screen
+            if self.alert:
+                self.pre_emergency_state = 'dispatch'
+                logger.info(f"Received dispatch description during alert — updated pre-emergency state to dispatch")
+                return
+
+        # Normal (non-alert, non-error override) path: let the existing handler manage the screen
+        flat_msg = {
+            "type": "set_trip_description",
+            "status": status,
+            "next_station": next_station,
+            "waiting_for": waiting_for,
+        }
+        self.handle_set_trip_description(flat_msg)
+
     def handle_set_trip_status(self, msg):
         if self.error_active:
             logger.info("Skipping trip_status screen update — mule error is active")
@@ -445,60 +471,9 @@ class Handler:
         ):
             logger.info(f"Successfully set next station to {next_station}")
         if stoppage_type == "detected_obstacle":
-            self.last_obstacle_time = time.time()
-            self.switch_to_warning()
-
-            if self.client.write_coil(512, 1):
-                logger.info("Shown obstacle detected image")
-            else:
-                logger.error("Failed to show obstacle detected image")
-            
-            try:
-                extra_info = stoppage_data.get("extra_info", {})
-                local_obstacle = extra_info.get("local_obstacle")
-                print(f"local_obstacle: {local_obstacle}")
-                
-                if local_obstacle is not None and len(local_obstacle) >= 2:
-                    x = float(local_obstacle[0])
-                    y = float(local_obstacle[1])
-                    # logger.info(f"Extracted local_obstacle from trip_status: [{x}, {y}]")
-                    
-                    distance_meters = math.sqrt(x**2 + y**2)
-                    distance_cm = int(distance_meters * 100)
-                    
-                    logger.info(f"Calculated obstacle distance: {distance_meters:.2f}m ({distance_cm}cm)")
-                    
-                    self.write_obstacle_direction(x, y)
-                    
-                    # coordinates_msg = f"[{x:.2f}, {y:.2f}]"
-                    # if self.client.write_string_to_registers(
-                    #     hmm.WriteAddresses.OBSTACLE_COORDINATES, coordinates_msg, 50
-                    # ):
-                    #     logger.info(f"Successfully wrote obstacle coordinates to OBSTACLE_COORDINATES: {coordinates_msg}")
-                    # else:
-                    #     logger.error("Failed to write obstacle coordinates to OBSTACLE_COORDINATES")
-                    
-                    warning_msg = f"Distance {distance_meters:.2f} m"
-                    if self.client.write_string_to_registers(
-                        hmm.WriteAddresses.OBSTACLE_DISTANCE, warning_msg, 16
-                    ):
-                        logger.info(f"Successfully set obstacle warning with distance: {warning_msg}")
-                    else:
-                        logger.error("Failed to set obstacle warning message")
-                else:
-                    logger.warning(f"local_obstacle not found or invalid in trip_status message: {local_obstacle}")
-                    # Set basic warning even if coordinates are missing
-                    if self.client.write_string_to_registers(
-                        hmm.WriteAddresses.WARNING_INFO, "", 50
-                    ):
-                        logger.info("Successfully set basic obstacle detected warning")
-            except (KeyError, ValueError, TypeError, IndexError) as e:
-                logger.error(f"Error extracting local_obstacle from trip_status: {e}")
-                # Set basic warning on error
-                if self.client.write_string_to_registers(
-                    hmm.WriteAddresses.WARNING_INFO, "", 50
-                ):
-                    logger.info("Successfully set basic obstacle detected warning")
+            extra_info = stoppage_data.get("extra_info", {})
+            print(f"local_obstacle: {extra_info.get('local_obstacle')}")
+            self._show_obstacle(extra_info)
         else:
             if time.time() - self.last_obstacle_time < 5:
                 logger.info(f"Obstacle recently shown ({stoppage_type}), holding obstacle screen")
@@ -510,15 +485,52 @@ class Handler:
                 self.client.write_coil(coil_address, 0)
             self.switch_to_home()
 
+    def _show_obstacle(self, extra_info):
+        self.last_obstacle_time = time.time()
+        self.switch_to_warning()
+        if self.client.write_coil(512, 1):
+            logger.info("Shown obstacle detected image")
+        else:
+            logger.error("Failed to show obstacle detected image")
+        try:
+            local_obstacle = extra_info.get("local_obstacle")
+            if local_obstacle is not None and len(local_obstacle) >= 2:
+                x = float(local_obstacle[0])
+                y = float(local_obstacle[1])
+                distance_meters = math.sqrt(x**2 + y**2)
+                distance_cm = int(distance_meters * 100)
+                logger.info(f"Calculated obstacle distance: {distance_meters:.2f}m ({distance_cm}cm)")
+                self.write_obstacle_direction(x, y)
+                warning_msg = f"Distance {distance_meters:.2f} m"
+                if self.client.write_string_to_registers(hmm.WriteAddresses.OBSTACLE_DISTANCE, warning_msg, 16):
+                    logger.info(f"Successfully set obstacle warning with distance: {warning_msg}")
+                else:
+                    logger.error("Failed to set obstacle warning message")
+            else:
+                logger.warning(f"local_obstacle not found or invalid: {local_obstacle}")
+                self.client.write_string_to_registers(hmm.WriteAddresses.WARNING_INFO, "", 50)
+        except (KeyError, ValueError, TypeError, IndexError) as e:
+            logger.error(f"Error extracting local_obstacle: {e}")
+            self.client.write_string_to_registers(hmm.WriteAddresses.WARNING_INFO, "", 50)
+
+    def handle_set_detected_obstacle(self, msg):
+        if self.error_active or self.alert:
+            logger.info("Skipping set_detected_obstacle — error/alert is active")
+            return
+        extra_info = msg.get("extra_info", {})
+        self._show_obstacle(extra_info)
+
     def handle_action_terminate_trip(self, msg):
-        """
-        Handle terminate_trip action messages
-        """
         trip_id = msg.get('trip_id')
-        self._clear_trip_state()
-        self.client.write_coil(17, 0)
-        self.client.write_register(0, 0)
         logger.info(f"Received terminate_trip action - Trip ID: {trip_id}")
+        self._clear_trip_state()
+        self.client.write_coil(hmm.WriteAddresses.EN_ROUTE, 0)
+        if self.error_active:
+            self.switch_to_error()
+            logger.info("terminate_trip: error active — staying on error screen")
+        elif not self.alert:
+            self.switch_to_home()
+            logger.info("terminate_trip: navigated to home screen")
 
     def switch_to_warning(self):
         ok = all([
